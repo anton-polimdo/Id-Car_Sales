@@ -3,159 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otomotif Sales Dashboard</title>
-    <!-- Menggunakan CDN Alternatif Unpkg agar tampilan langsung rapi tanpa unduh file -->
-    <link href="https://unpkg.com" rel="stylesheet">
+    <title>Otomotif Sales Dashboard - Standalone Fixed</title>
+    <!-- GAYA BASE CSS MANUAL (MENGGANTIKAN BOOTSTRAP YANG DIBLOKIR) -->
     <style>
-        .sidebar { min-height: 100vh; width: 260px; background-color: #1e293b; color: #f8fafc; }
-        .sidebar .nav-link { color: #94a3b8; font-weight: 500; cursor: pointer; text-align: left; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #f8fafc; background-color: #334155; border-radius: 6px; }
-        .main-content { background-color: #f1f5f9; flex: 1; padding: 2rem; }
-        .card-stat { border: none; border-radius: 12px; }
-        .chart-container { background: #ffffff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); min-height: 340px; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; display: flex; background-color: #f1f5f9; min-height: 100vh; }
+        .sidebar { width: 260px; background-color: #1e293b; color: #f8fafc; padding: 20px; flex-shrink: 0; }
+        .sidebar h3 { margin-top: 0; margin-bottom: 30px; color: #3b82f6; font-size: 22px; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu li { margin-bottom: 10px; }
+        .sidebar-menu button { width: 100%; text-align: left; padding: 12px; background: none; border: none; color: #94a3b8; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 6px; }
+        .sidebar-menu button:hover, .sidebar-menu button.active { color: #f8fafc; background-color: #334155; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .header { margin-bottom: 30px; }
+        .header h2 { margin: 0 0 5px 0; color: #0f172a; }
+        .header p { margin: 0; color: #64748b; font-size: 14px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card-stat { background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-stat span { color: #64748b; font-size: 12px; font-weight: 700; text-uppercase: uppercase; display: block; margin-bottom: 5px; }
+        .card-stat h3 { margin: 0 0 5px 0; font-size: 28px; color: #1e293b; }
+        .card-stat p { margin: 0; color: #10b981; font-size: 13px; font-weight: 500; }
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media(max-width: 992px) { .charts-grid { grid-template-columns: 1fr; } }
+        .chart-box { background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .chart-box h5 { margin: 0 0 20px 0; font-size: 16px; color: #1e293b; }
+        .canvas-wrapper { position: relative; height: 300px; width: 100%; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; color: #64748b; font-weight: 600; }
+        .toggle-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .toggle-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
     </style>
 </head>
 <body>
 
-    <div class="d-flex">
-        <!-- SIDEBAR -->
-        <div class="sidebar p-3">
-            <div class="mb-4 px-2">
-                <span class="fs-5 fw-bold text-white">AutoSales v1</span>
-            </div>
-            <!-- Navigasi Menu Menu Kiri -->
-            <div class="nav flex-column gap-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <button class="nav-link active border-0 bg-transparent" id="menu-ringkasan" data-bs-toggle="pill" data-bs-target="#konten-ringkasan" type="button" role="tab">■ Ringkasan</button>
-                <button class="nav-link border-0 bg-transparent" id="menu-merek" data-bs-toggle="pill" data-bs-target="#konten-merek" type="button" role="tab">■ Analisis Merek</button>
-                <button class="nav-link border-0 bg-transparent" id="menu-pengaturan" data-bs-toggle="pill" data-bs-target="#konten-pengaturan" type="button" role="tab">■ Pengaturan</button>
-            </div>
-        </div>
-
-        <!-- MAIN CONTENT (Konten Dinamis) -->
-        <div class="main-content tab-content" id="v-pills-tabContent">
-            
-            <!-- KONTEN 1: RINGKASAN (MENU UTAMA) -->
-            <div class="tab-pane fade show active" id="konten-ringkasan" role="tabpanel">
-                <div class="mb-4">
-                    <h2 class="fw-bold mb-0">Dashboard Penjualan Otomotif</h2>
-                    <small class="text-muted">Analisis Kinerja Penjualan Berdasarkan Model Data Terunggah</small>
-                </div>
-
-                <!-- KARTU STATISTIK -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="card card-stat bg-white shadow-sm p-3">
-                            <span class="text-muted small text-uppercase fw-bold">Total Sales</span>
-                            <h3 class="fw-bold my-1 text-primary">164,751</h3>
-                            <span class="text-success small fw-medium">Data 2023 - 2026</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card card-stat bg-white shadow-sm p-3">
-                            <span class="text-muted small text-uppercase fw-bold">Kategori Terlaris</span>
-                            <h3 class="fw-bold my-1 text-success">4X2 (SUV/MPV)</h3>
-                            <span class="text-muted small">Dominasi pasar tinggi</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card card-stat bg-white shadow-sm p-3">
-                            <span class="text-muted small text-uppercase fw-bold">Merek Terpopuler</span>
-                            <h3 class="fw-bold my-1 text-warning">TOYOTA & MAZDA</h3>
-                            <span class="text-muted small">Volume Tertinggi</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GRAFIK INTERAKTIF -->
-                <div class="row g-4 mb-4">
-                    <div class="col-lg-8">
-                        <div class="chart-container">
-                            <h5 class="fw-bold text-dark mb-3">Tren Penjualan Bulanan</h5>
-                            <canvas id="salesTrendChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="chart-container">
-                            <h5 class="fw-bold text-dark mb-3">Distribusi Bahan Bakar</h5>
-                            <canvas id="fuelShareChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- KONTEN 2: ANALISIS MEREK -->
-            <div class="tab-pane fade" id="konten-merek" role="tabpanel">
-                <h2 class="fw-bold">Analisis Kinerja Merek</h2>
-                <p class="text-muted">Berikut rincian volume penjualan berdasarkan pabrikan terunggah:</p>
-                <div class="card p-3 shadow-sm border-0">
-                    <table class="table table-striped mb-0">
-                        <thead>
-                            <tr><th>Merek</th><th>Kategori Utama</th><th>Status Pasar</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Toyota</td><td>4X2 / Sedan</td><td class="text-success fw-bold">Pemimpin Pasar</td></tr>
-                            <tr><td>Mazda</td><td>4X2 / SUV</td><td class="text-primary fw-bold">Pertumbuhan Tinggi</td></tr>
-                            <tr><td>Mitsubishi</td><td>Pickup Truck</td><td class="text-secondary fw-bold">Stabil</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- KONTEN 3: PENGATURAN -->
-            <div class="tab-pane fade" id="konten-pengaturan" role="tabpanel">
-                <h2 class="fw-bold">Pengaturan Dashboard</h2>
-                <p class="text-muted">Konfigurasi preferensi tampilan aplikasi Anda.</p>
-                <div class="card p-4 shadow-sm border-0">
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked>
-                        <label class="form-check-input-label" for="flexSwitchCheckDefault">Aktifkan Notifikasi Data Baru</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="darkModeSwitch">
-                        <label class="form-check-input-label" for="darkModeSwitch">Mode Gelap (Dark Mode)</label>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h3>AutoSales v1</h3>
+        <ul class="sidebar-menu">
+            <li><button class="menu-btn active" onclick="bukaTab('ringkasan', this)">■ Ringkasan</button></li>
+            <li><button class="menu-btn" onclick="bukaTab('merek', this)">■ Analisis Merek</button></li>
+            <li><button class="menu-btn" onclick="bukaTab('pengaturan', this)">■ Pengaturan</button></li>
+        </ul>
     </div>
 
-    <!-- Pustaka JavaScript Utama Menggunakan Jalur Alternatif Unpkg yang Terjamin Stabil -->
-    <script src="https://unpkg.com"></script>
-    <script src="https://unpkg.com"></script>
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        
+        <!-- TAB 1: RINGKASAN -->
+        <div id="ringkasan" class="tab-content active">
+            <div class="header">
+                <h2>Dashboard Penjualan Otomotif</h2>
+                <p>Analisis Kinerja Penjualan Berdasarkan Model Data Terunggah</p>
+            </div>
+            <div class="stats-grid">
+                <div class="card-stat">
+                    <span>Total Sales</span>
+                    <h3 style="color: #3b82f6;">164,751</h3>
+                    <p>Data 2023 - 2026</p>
+                </div>
+                <div class="card-stat">
+                    <span>Kategori Terlaris</span>
+                    <h3 style="color: #10b981;">4X2 (SUV/MPV)</h3>
+                    <p style="color: #64748b;">Dominasi pasar tinggi</p>
+                </div>
+                <div class="card-stat">
+                    <span>Merek Terpopuler</span>
+                    <h3 style="color: #f59e0b;">TOYOTA & MAZDA</h3>
+                    <p style="color: #64748b;">Volume Penjualan Tertinggi</p>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <h5>Tren Penjualan Bulanan</h5>
+                    <div class="canvas-wrapper"><canvas id="salesTrendChart"></canvas></div>
+                </div>
+                <div class="chart-box">
+                    <h5>Distribusi Bahan Bakar</h5>
+                    <div class="canvas-wrapper"><canvas id="fuelShareChart"></canvas></div>
+                </div>
+            </div>
+        </div>
 
+        <!-- TAB 2: ANALISIS MEREK -->
+        <div id="merek" class="tab-content">
+            <div class="header">
+                <h2>Analisis Kinerja Merek</h2>
+                <p>Berikut rincian volume penjualan berdasarkan pabrikan terunggah:</p>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Merek</th><th>Kategori Utama</th><th>Status Pasar</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Toyota</td><td>4X2 / Sedan</td><td style="color: #10b981; font-weight: bold;">Pemimpin Pasar</td></tr>
+                    <tr><td>Mazda</td><td>4X2 / SUV</td><td style="color: #3b82f6; font-weight: bold;">Pertumbuhan Tinggi</td></tr>
+                    <tr><td>Mitsubishi</td><td>Pickup Truck</td><td style="color: #64748b; font-weight: bold;">Stabil</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TAB 3: PENGATURAN -->
+        <div id="pengaturan" class="tab-content">
+            <div class="header">
+                <h2>Pengaturan Dashboard</h2>
+                <p>Konfigurasi preferensi tampilan aplikasi Anda.</p>
+            </div>
+            <div class="toggle-box">
+                <div class="toggle-item">
+                    <span>Aktifkan Notifikasi Data Baru</span>
+                    <input type="checkbox" checked style="transform: scale(1.3);">
+                </div>
+                <div class="toggle-item">
+                    <span>Mode Gelap (Dark Mode)</span>
+                    <input type="checkbox" style="transform: scale(1.3);">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PUSTAKA UTAN CHART.JS DI-EMBED LANGSUNG (ANTI-BLOCK/OFFLINE TOTAL) -->
+    <script src="https://jsdelivr.net"></script>
+    
     <script>
-        // Memastikan dokumen siap sebelum menggambar grafik
-        document.addEventListener("DOMContentLoaded", function() {
+        // FUNGSI NAVIGASI TAB MENU SAMPING
+        function bukaTab(tabId, elemenTombol) {
+            const semuaTab = document.querySelectorAll('.tab-content');
+            semuaTab.forEach(tab => tab.classList.remove('active'));
             
-            // 1. Grafik Garis Tren Bulanan
-            const ctxTrend = document.getElementById('salesTrendChart');
-            if (ctxTrend) {
-                new Chart(ctxTrend, {
-                    type: 'line',
+            const semuaTombol = document.querySelectorAll('.menu-btn');
+            semuobombol = semuaTombol.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            elemenTombol.classList.add('active');
+        }
+
+        // GAMBAR GRAFIK SETELAH SCRIPT TERMUAT
+        window.onload = function() {
+            if (typeof Chart !== 'undefined') {
+                // 1. Grafik Batang Tren Bulanan
+                new Chart(document.getElementById('salesTrendChart'), {
+                    type: 'bar',
                     data: {
                         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                         datasets: [{
-                            label: 'Pola Penjualan Bulanan',
+                            label: 'Volume Penjualan',
                             data:,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.3,
-                            fill: true
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 5
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
+                    options: { responsive: true, maintainAspectRatio: false }
                 });
-            }
 
-            // 2. Grafik Lingkaran Distribusi Bahan Bakar
-            const ctxFuel = document.getElementById('fuelShareChart');
-            if (ctxFuel) {
-                new Chart(ctxFuel, {
-                    type: 'doughnut',
+                // 2. Grafik Lingkaran Distribusi Bahan Bakar
+                new Chart(document.getElementById('fuelShareChart'), {
+                    type: 'pie',
                     data: {
                         labels: ['Gasoline', 'Diesel', 'BEV', 'Hybrid'],
                         datasets: [{
@@ -163,13 +169,10 @@
                             backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
+                    options: { responsive: true, maintainAspectRatio: false }
                 });
             }
-        });
+        };
     </script>
 </body>
 </html>
