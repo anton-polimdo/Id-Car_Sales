@@ -1,36 +1,120 @@
-# Analisis Pasar Otomotif Indonesia: Tren Wholesales GAIKINDO (2023 - 2026)
-## Deskripsi Proyek
-Proyek ini melakukan analisis mendalam terhadap pergerakan pasar otomotif roda empat di Indonesia berdasarkan data resmi distribusi pabrikan ke dealer (*wholesales*) dari **GAIKINDO** periode tahun 2023 hingga data berjalan 2026. Proyek ini berfokus pada pelacakan tren transisi energi dari kendaraan konvensional (ICE) menuju era elektrifikasi (Hybrid & BEV), serta dinamika kompetisi antar-pabrikan global di pasar domestik.
-## 🛠️ Tech Stack & Alat yang Digunakan
-- **Bahasa Pemrograman:** Python 3.11
-- **Pustaka Data:** `pandas`, `numpy`, `pdfplumber` (Data Scraping & Cleaning)
-- **Visualisasi & Dashboard:** Tableau Desktop / Power BI (Bisa disesuaikan)
-- **Dokumentasi:** Markdown
-## 📁 Struktur Repositori
-```text
+# Id-Car_Sales — GAIKINDO Data Pipeline & Dashboard
+
+Proyek ini mengekstraksi, membersihkan, dan menggabungkan data penjualan
+wholesales kendaraan bermotor Indonesia dari laporan resmi **GAIKINDO**
+(Gabungan Industri Kendaraan Bermotor Indonesia), lalu menyiapkannya untuk
+divisualisasikan dalam bentuk dashboard interaktif.
+
+## Struktur Proyek
+
+```
 ├── data/
 │   ├── raw/                # Berkas PDF asli tahunan dari GAIKINDO
-│   └── processed/          # Berkas CSV bersih hasil pembersihan awal
+│   └── processed/          # Hasil ekstraksi & pembersihan (CSV)
 ├── scripts/
-│   ├── extract_2023.py     # Skrip ekstraksi PDF ke DataFrame
-│   ├── clean_data.py       # Skrip pembersihan karakter eror dan standardisasi
-│   └── consolidate.py      # Skrip penggabungan data multi-tahun (Master)
+│   ├── extract_2023.py     # Ekstraksi semua PDF di data/raw/ → CSV mentah
+│   ├── clean_data.py       # Pembersihan & standardisasi tipe data
+│   └── consolidate.py      # Penggabungan seluruh tahun → satu master file
 ├── dashboard/
-│   └── gaikindo_dashboard.twbx # Berkas hasil rancangan dashboard interaktif
-└── README.md               # Dokumentasi utama proyek
+│   └── gaikindo_dashboard.twbx   # Dashboard interaktif (Tableau)
+└── README.md
 ```
 
-## 📊 Rancangan Arsitektur Tabel (Data Schema)
-Data akhir dikonsolidasikan ke dalam format *Tidy Data* (Long Format) dengan struktur berikut:
-- `year` (int): Tahun distribusi (2023 - 2026)
-- `month` (str): Bulan distribusi format 3 huruf (`jan`, `feb`, dst)
-- `category` (str): Segmen kendaraan (`SEDAN`, `4X2`, `4X4`, `BUS`, `PICK UP/TRUCK`)
-- `brand` (str): Pabrikan otomotif skala besar (`TOYOTA`, `BYD`, `WULING`, dst)
-- `model` (str): Nama lengkap varian komersial mobil
-- `cc` (int): Kapasitas kubikasi mesin (0 untuk tipe full elektrik/BEV)
-- `fuel` (str): Sumber energi (`G` = Bensin, `D` = Diesel, `HYBRID`, `BEV`, `PHEV`)
-- `assembly` (str): Status manufaktur lokasi rakit (`CKD INA`, `CBU Japan`, dst)
-- `sales_volume` (int): Total volume unit terdistribusi bulanan (Mendukung angka negatif untuk retur pembatalan order)
+## Sumber Data
 
-## 💡 Temuan Utama (Key Insights)
-*(Bagian ini akan diperbarui secara otomatis setelah kalkulasi statistik deskriptif dijalankan di langkah berikutnya)*
+Berkas PDF "GAIKINDO Wholesales Data" — laporan tahunan hasil export
+Excel-ke-PDF yang berisi 7 kategori kendaraan:
+
+| Kategori | Isi |
+|---|---|
+| `SEDAN` | Mobil sedan |
+| `4X2` | Mobil penumpang 4x2 |
+| `4X4` | Mobil penumpang 4x4 |
+| `BUS` | Bus |
+| `PICKUP_TRUCK` | Pick up & truk |
+| `DOUBLE_CABIN` | Double cabin |
+| `AFFORDABLE_ENERGY` | Mobil hemat energi & terjangkau (LCGC) |
+
+> **Catatan:** Format laporan GAIKINDO berubah sedikit tiap tahun (mis. format
+> persentase, brand baru yang muncul di pasar). Jika file tahun berikutnya
+> gagal diproses, cek pesan error dari `extract_2023.py` — biasanya perlu
+> penyesuaian kecil pada pola regex atau daftar `KNOWN_BRANDS`.
+
+## Alur Kerja (Pipeline)
+
+```
+data/raw/*.pdf
+      │
+      ▼  extract_2023.py  (pdftotext -layout + regex parser)
+data/processed/gaikindo_<tahun>_raw.csv
+      │
+      ▼  clean_data.py  (standardisasi tipe data, buang baris invalid)
+data/processed/gaikindo_<tahun>_clean.csv
+      │
+      ▼  consolidate.py  (gabungkan semua tahun)
+data/processed/gaikindo_master.csv
+      │
+      ▼
+dashboard/  (Tableau / alat visualisasi lain)
+```
+
+### 1. Ekstraksi (`extract_2023.py`)
+Membaca semua PDF di `data/raw/` menggunakan `pdftotext -layout` (dari Poppler)
+untuk mempertahankan posisi kolom, lalu memisahkan tiap baris data kendaraan
+menjadi kolom-kolom terstruktur menggunakan regex — termasuk memisahkan
+BRAND dari MODEL menggunakan daftar brand yang dikenal (`KNOWN_BRANDS`).
+
+### 2. Pembersihan (`clean_data.py`)
+Mengonversi tipe data (angka, teks), membersihkan format CC (engine size),
+dan membuang baris yang tidak valid (tanpa brand & model).
+
+### 3. Konsolidasi (`consolidate.py`)
+Menggabungkan seluruh `*_clean.csv` menjadi satu `gaikindo_master.csv`.
+
+## Skema Data (`gaikindo_master.csv`)
+
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `year` | int | Tahun data |
+| `category` | str | Salah satu dari 7 kategori di atas |
+| `brand` | str | Merek kendaraan (mis. TOYOTA, HONDA) |
+| `model` | str | Nama model/tipe |
+| `cc` | float | Kapasitas mesin (cc) |
+| `fuel` | str | Jenis bahan bakar (G, D, BEV, HYBRID, PHEV, dst) |
+| `cbu_ckd` | str | Status impor (CBU) atau rakitan lokal (CKD) |
+| `country` | str | Negara asal |
+| `jan` ... `dec` | int | Unit terjual per bulan |
+| `sales_volume` | int | Total unit terjual dalam setahun |
+
+## Cara Menjalankan
+
+```bash
+# 1. (Opsional) buat virtual environment
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+
+# 2. Install dependensi
+pip install pandas pdfplumber
+
+# 3. Pastikan Poppler (pdftotext) terinstall — dibutuhkan oleh extract_2023.py
+pdftotext -v   # jika error "command not found", install Poppler dulu
+
+# 4. Letakkan PDF GAIKINDO di data/raw/, lalu jalankan pipeline
+python scripts/extract_2023.py
+python scripts/clean_data.py
+python scripts/consolidate.py
+```
+
+Hasil akhir ada di `data/processed/gaikindo_master.csv`.
+
+## Status Proyek
+
+- [x] Ekstraksi PDF multi-tahun (2023–2025)
+- [x] Pembersihan & standardisasi data
+- [x] Konsolidasi multi-tahun
+- [ ] Dashboard interaktif (`dashboard/gaikindo_dashboard.twbx`)
+- [ ] Ekstraksi data 2026 (menyusul saat PDF tersedia)
+
+## Lisensi
+
+Tentukan lisensi proyek Anda di sini (mis. MIT License).
