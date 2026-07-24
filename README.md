@@ -2,7 +2,7 @@
 
 Proyek ini mengekstraksi, membersihkan, dan menggabungkan data penjualan
 wholesales kendaraan bermotor Indonesia dari laporan resmi **GAIKINDO**
-(Gabungan Industri Kendaraan Bermotor Indonesia), lalu menyiapkannya untuk
+(Gabungan Industri Kendaraan Bermotor Indonesia) Tahun 2023,2024,2025 dan Jan - Juni 2026, lalu menyiapkannya untuk
 divisualisasikan dalam bentuk dashboard interaktif.
 
 ## Struktur Proyek
