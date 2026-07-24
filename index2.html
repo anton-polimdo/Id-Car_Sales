@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otomotif Sales Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+       <!-- FontAwesome Icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.cjs">
+    <style>
+        .sidebar { min-height: 100vh; width: 260px; background-color: #1e293b; color: #f8fafc; }
+        .sidebar .nav-link { color: #94a3b8; font-weight: 500; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #f8fafc; background-color: #334155; border-radius: 6px; }
+        .main-content { background-color: #f1f5f9; flex: 1; padding: 2rem; }
+        .card-stat { border: none; border-radius: 12px; transition: transform 0.2s; }
+        .card-stat:hover { transform: translateY(-4px); }
+        .chart-container { background: #ffffff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+    </style>
+</head>
+<body>
+
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <div class="sidebar p-3 d-none d-md-block">
+            <div class="d-flex align-items-center mb-4 px-2">
+                <i class="fa-solid fa-car-side fs-4 me-2 text-primary"></i>
+                <span class="fs-5 fw-bold">AutoSales v1</span>
+            </div>
+            <ul class="nav flex-column gap-2">
+                <li class="nav-item"><a href="#" class="nav-link active"><i class="fa-solid fa-chart-pie me-2"></i> Ringkasan</a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-car me-2"></i> Analisis Merek</a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-gears me-2"></i> Pengaturan</a></li>
+            </ul>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-0">Dashboard Penjualan Otomotif</h2>
+                    <small class="text-muted">Analisis Kinerja Penjualan Berdasarkan Model Data Terunggah</small>
+                </div>
+            </div>
+
+            <!-- KARTU STATISTIK -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card card-stat bg-white shadow-sm p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted small text-uppercase fw-bold">Total Sales (Sampel Data)</span>
+                                <h3 class="fw-bold my-1 text-primary">164,751</h3>
+                                <span class="text-success small fw-medium"><i class="fa-solid fa-arrow-trend-up"></i> Data 2023 - 2026</span>
+                            </div>
+                            <div class="bg-primary-subtle p-3 rounded-circle text-primary"><i class="fa-solid fa-boxes-stacked fs-4"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat bg-white shadow-sm p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted small text-uppercase fw-bold">Kategori Terlaris</span>
+                                <h3 class="fw-bold my-1 text-success">4X2 (SUV/MPV)</h3>
+                                <span class="text-muted small">Dominasi pasar lokal tinggi</span>
+                            </div>
+                            <div class="bg-success-subtle p-3 rounded-circle text-success"><i class="fa-solid fa-truck-pickup fs-4"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat bg-white shadow-sm p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted small text-uppercase fw-bold">Merek Terpopuler</span>
+                                <h3 class="fw-bold my-1 text-warning">TOYOTA & MAZDA</h3>
+                                <span class="text-muted small">Volume Penjualan Tertinggi</span>
+                            </div>
+                            <div class="bg-warning-subtle p-3 rounded-circle text-warning"><i class="fa-solid fa-tags fs-4"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRAFIK INTERAKTIF -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-8">
+                    <div class="chart-container">
+                        <h5 class="fw-bold text-dark mb-3">Tren Penjualan Bulanan (Sampel Data Otomotif)</h5>
+                        <canvas id="salesTrendChart" height="280"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="chart-container h-100">
+                        <h5 class="fw-bold text-dark mb-3">Distribusi Bahan Bakar</h5>
+                        <canvas id="fuelShareChart" height="280"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Chart.js CDN JS -->
+        <!-- Memanggil JS Grafik Lokal -->
+    <script src="chart.js"></script>
+    <script>
+        // 1. Perbaikan Grafik Tren Bulanan (Angka diisi lengkap)
+        const ctxTrend = document.getElementById('salesTrendChart').getContext('2d');
+        new Chart(ctxTrend, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Volume Penjualan',
+                    data:,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // 2. Perbaikan Grafik Distribusi Bahan Bakar (Angka diisi lengkap)
+        const ctxFuel = document.getElementById('fuelShareChart').getContext('2d');
+        new Chart(ctxFuel, {
+            type: 'doughnut',
+            data: {
+                labels: ['Gasoline (G)', 'Diesel (D)', 'BEV (Listrik)', 'Hybrid / PHEV'],
+                datasets: [{
+                    data:,
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+</body>
+</html>
